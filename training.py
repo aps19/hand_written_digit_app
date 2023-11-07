@@ -65,7 +65,14 @@ def create_cnn_model(learning_rate, dropout, device, hidden_units, optimizer,epo
         device=device,
         criterion=nn.CrossEntropyLoss,  # Use CrossEntropyLoss for classification
         module__dropout=dropout,  # Set dropout rate as a hyperparameter
+        callbacks=[
+            ('train_acc', EpochScoring(scoring='accuracy', lower_is_better=False)),
+            ('valid_acc', EpochScoring(scoring='accuracy', lower_is_better=False)),
+            ('train_loss', EpochScoring(scoring='neg_log_loss', lower_is_better=False)),
+            ('valid_loss', EpochScoring(scoring='neg_log_loss', lower_is_better=False)),
+        ],
     )
+    
     return model
 
 def load_mnist_data(batch_size, test_split):
@@ -109,7 +116,7 @@ def load_mnist_data(batch_size, test_split):
     plt.tight_layout()
     st.pyplot(fig)
 
-    return X_train,y_train
+    return X_train, X_test, y_train, y_test
 
 
 def training_and_evaluation_app():
@@ -133,7 +140,7 @@ def training_and_evaluation_app():
     batch_size = st.sidebar.number_input("Batch Size", 1, 512, 64, 1)
     test_split = st.sidebar.number_input("Test data size",0.01,0.5,0.2,0.01)
 
-    X_train, y_train = load_mnist_data(batch_size, test_split)  # Pass the batch size to the data loader
+    X_train, X_test, y_train, y_test  = load_mnist_data(batch_size, test_split)  # Pass the batch size to the data loader
     
     optimizer = torch.optim.Adam if optimizer == "Adam" else torch.optim.SGD
 
@@ -153,38 +160,46 @@ def training_and_evaluation_app():
             
             model.fit(X_train, y_train, epochs=1)  # Train for one epoch
 
-            # You can collect and display training metrics here
-            accuracy = 0.85  # Replace with your actual accuracy
-            loss = 0.12  # Replace with your actual loss
+            st.subheader("Training Metrics")
+            st.write("Training Accuracy:", model.history[-1, 'train_acc'])
+            st.write("Validation Accuracy:", model.history[-1, 'valid_acc'])
+            st.write("Training Loss:", -model.history[-1, 'train_loss'])
+            st.write("Validation Loss:", -model.history[-1, 'valid_loss'])
 
-            st.text(f"Accuracy: {accuracy:.2%}")
-            st.text(f"Loss: {loss:.4f}")
+            # Evaluate the model on test data
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            st.subheader("Model Evaluation")
+            st.write("Test Accuracy:", accuracy)
+            
+        if st.button("Save Model"):
+            # Generate a timestamp
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-        # Model Evaluation
-        st.subheader("Model Evaluation")
-        st.write("Evaluating the model...")
-        y_true, y_pred = [], []
+            # Define the filename with the timestamp
+            model_save_path = f"complete_model_{current_time}.pth"
+            torch.save(model, model_save_path)
 
-        with torch.no_grad():
-            for images, labels in test_loader:
-                outputs = model.predict(images)
-                y_true.extend(labels.numpy())
-                y_pred.extend(outputs.argmax(1).numpy())
+            
+        if st.button("Evaluation Metrics"):
+            st.subheader("Model Evaluation")
+            st.write("Evaluating the model...")
+            
+            # Evaluate the model on test data
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            st.subheader("Model Evaluation")
+            st.write("Test Accuracy:", accuracy)
 
-        accuracy = accuracy_score(y_true, y_pred)
+            conf_matrix = confusion_matrix(y_true, y_pred)
+            st.subheader("Confusion Matrix")
+            st.write(conf_matrix)
 
-        st.write(f"Final Accuracy: {accuracy:.2%}")
+            class_report = classification_report(y_true, y_pred)
+            st.subheader("Classification Report")
+            st.text(class_report)
 
-        conf_matrix = confusion_matrix(y_true, y_pred)
-        st.subheader("Confusion Matrix")
-        st.write(conf_matrix)
-
-        class_report = classification_report(y_true, y_pred)
-        st.subheader("Classification Report")
-        st.text(class_report)
-
-        plt.figure(figsize=(8, 6))
-        plt.imshow(conf_matrix, cmap="Blues", interpolation="nearest")
-        st.subheader("Confusion Matrix Heatmap")
-        st.pyplot(plt)
-
+            plt.figure(figsize=(8, 6))
+            plt.imshow(conf_matrix, cmap="Blues", interpolation="nearest")
+            st.subheader("Confusion Matrix Heatmap")
+            st.pyplot(plt)
