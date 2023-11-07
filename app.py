@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 # Import the first page from front_page.py
 from front_page import about
 from training import training_and_evaluation_app
+from classify import image_classification_app
 
 def main():
     if "button_id" not in st.session_state:
@@ -24,6 +25,7 @@ def main():
     PAGES = {
         "About": about,
         "Training and Evaluation": training_and_evaluation_app,
+        "Classify your digit": image_classification_app,
     }
     page = st.sidebar.selectbox("Page:", options=list(PAGES.keys()))
     PAGES[page]()
