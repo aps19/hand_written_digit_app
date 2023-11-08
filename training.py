@@ -164,10 +164,9 @@ def training_and_evaluation_app():
         st.pyplot(plt)
             
         if st.button("Save Model"):
-            # Generate a timestamp
-            current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-
-            # Define the filename with the timestamp
-            model_save_path = f"complete_model_{current_time}.pkl"
-            with open(model_save_path, 'wb') as f:
-                pickle.dump(model, f)
+            
+            model.save_params(
+                f_params='digit_model_params.pkl',
+                f_optimizer='digit_optimizer_state.pkl',
+                f_history='digit_training_history.json'
+            )

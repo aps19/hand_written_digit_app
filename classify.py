@@ -6,7 +6,7 @@ import numpy as np
 from torchvision import transforms
 import pickle
 
-def create_cnn_model(learning_rate, dropout, device, hidden_units, optimizer,epochs):
+def create_cnn_model(learning_rate=0.01, dropout=0.5, device='cpu', hidden_units=100, optimizer='Adam',epochs=10):
     class Cnn(nn.Module):
         def __init__(self, dropout=0.5):
             super(Cnn, self).__init__()
@@ -85,11 +85,18 @@ def image_classification_app():
         image = Image.open(uploaded_image)
         image = preprocess_image(image)
 
-        # Load the trained model
-        model_path = "complete_model_2023-11-08_21-18-19.pkl"  # Provide the path to your saved model
-        with open(model_path, 'rb') as f:
-            model = pickle.load(f)
+        # Define a new model instance with the same architecture
+        model = create_cnn_model()
+        model.initialize()  # Important: Initialize the model
 
+        # Load the saved parameters, optimizer state, and history
+        model.load_params(
+            f_params='model_params.pkl',
+            f_optimizer='optimizer_state.pkl',
+            f_history='training_history.json'
+        )
+
+        st.write("Model loaded successfully!")
         # Classify the uploaded image
         predicted_class = classify_image(model, image)
 
