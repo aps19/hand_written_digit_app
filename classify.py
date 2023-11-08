@@ -4,6 +4,7 @@ import torch
 from PIL import Image
 import numpy as np
 from torchvision import transforms
+import pickle
 
 def create_cnn_model(learning_rate, dropout, device, hidden_units, optimizer,epochs):
     class Cnn(nn.Module):
@@ -29,19 +30,12 @@ def create_cnn_model(learning_rate, dropout, device, hidden_units, optimizer,epo
 
     model = NeuralNetClassifier(
         Cnn,
-        max_epochs=epochs,  # You can set this to your preferred number of epochs
+        max_epochs=epochs,
         lr=learning_rate,
         optimizer=optimizer,
         device=device,
-        criterion=nn.CrossEntropyLoss,  # Use CrossEntropyLoss for classification
-        module__dropout=dropout,  # Set dropout rate as a hyperparameter
-        callbacks=[
-            ('train_acc', EpochScoring(scoring='accuracy', lower_is_better=False)),
-            ('valid_acc', EpochScoring(scoring='accuracy', lower_is_better=False)),
-            ('train_loss', EpochScoring(scoring='neg_log_loss', lower_is_better=False)),
-            ('valid_loss', EpochScoring(scoring='neg_log_loss', lower_is_better=False)),
-        ],
     )
+
     
     return model
 
@@ -92,8 +86,9 @@ def image_classification_app():
         image = preprocess_image(image)
 
         # Load the trained model
-        model_path = "trained_model_2023-11-07_23-36-15.pth"  # Provide the path to your saved model
-        model = load_trained_model(model_path)
+        model_path = "complete_model_2023-11-08_21-18-19.pkl"  # Provide the path to your saved model
+        with open(model_path, 'rb') as f:
+            model = pickle.load(f)
 
         # Classify the uploaded image
         predicted_class = classify_image(model, image)

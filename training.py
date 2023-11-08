@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
 import torchvision.transforms as transforms
 from sklearn.datasets import fetch_openml
-
+import pickle
 from torchvision import datasets
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import matplotlib.pyplot as plt
@@ -133,7 +133,6 @@ def training_and_evaluation_app():
         # Training results
         st.subheader("Training Results")
         
-        st.write(X_train.shape)
         st.write(model.fit(X_train, y_train))  # Train for one epoch
 
         # Evaluate the model on test data
@@ -141,17 +140,7 @@ def training_and_evaluation_app():
         accuracy = accuracy_score(y_test, y_pred)
         st.subheader("Model Evaluation")
         st.write("Test Accuracy:", accuracy)
-            
-        if st.button("Save Model"):
-            # Generate a timestamp
-            current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-
-            # Define the filename with the timestamp
-            model_save_path = f"complete_model_{current_time}.pth"
-            torch.save(model, model_save_path)
-
-    # Evaluate model   
-    if st.button("Evaluation Metrics"):
+        
         st.subheader("Model Evaluation")
         st.write("Evaluating the model...")
         
@@ -173,3 +162,12 @@ def training_and_evaluation_app():
         plt.imshow(conf_matrix, cmap="Blues", interpolation="nearest")
         st.subheader("Confusion Matrix Heatmap")
         st.pyplot(plt)
+            
+        if st.button("Save Model"):
+            # Generate a timestamp
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+            # Define the filename with the timestamp
+            model_save_path = f"complete_model_{current_time}.pkl"
+            with open(model_save_path, 'wb') as f:
+                pickle.dump(model, f)
