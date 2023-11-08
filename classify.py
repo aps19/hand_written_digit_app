@@ -59,18 +59,22 @@ def preprocess_image(image):
     image = image.convert('L')
     # Normalize pixel values to [0, 1]
     image = np.array(image) / 255.0
-    # Convert to a PyTorch tensor and add batch dimension
-    image = torch.tensor(image, dtype=torch.float32).unsqueeze(0)
+    # Add batch dimension and channel dimension
+    image = image[np.newaxis, np.newaxis, :, :]
+    # Convert to a PyTorch tensor
+    image = torch.tensor(image, dtype=torch.float32)
     return image
+
 
 # Function to perform image classification
 def classify_image(model, image):
     with torch.no_grad():
-        # Forward pass through the model
-        outputs = model(image)
+        # You should use the 'predict' method to make predictions
+        predicted_classes = model.predict(image)
         # Get the predicted class (digit)
-        predicted_class = outputs.argmax().item()
+        predicted_class = predicted_classes[0]  # Assuming there's a single prediction
     return predicted_class
+
 
 # Create a Streamlit app page for image classification
 def image_classification_app():
