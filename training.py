@@ -7,6 +7,7 @@ import datetime
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
+from skorch.callbacks import EpochScoring
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
 import torchvision.transforms as transforms
@@ -19,21 +20,6 @@ import matplotlib.pyplot as plt
 # Define model as a global variable to make it accessible for all pages
 model = None
 
-
-def plot_images(X, y, rows=10, columns=10):
-    """Plot the first (rows x columns) images in a grid."""
-    fig, axes = plt.subplots(rows, columns, figsize=(12, 12))
-    
-    for i in range(rows):
-        for j in range(columns):
-            index = i * columns + j
-            ax = axes[i, j]
-            ax.imshow(X[index].reshape(28, 28), cmap='gray')
-            ax.axis('off')
-            ax.set_title(str(y[index]), fontsize=8)
-    
-    plt.tight_layout()
-    plt.show()
 
 def create_cnn_model(learning_rate, dropout, device, hidden_units, optimizer,epochs):
     class Cnn(nn.Module):
@@ -59,19 +45,12 @@ def create_cnn_model(learning_rate, dropout, device, hidden_units, optimizer,epo
 
     model = NeuralNetClassifier(
         Cnn,
-        max_epochs=epochs,  # You can set this to your preferred number of epochs
+        max_epochs=epochs,
         lr=learning_rate,
         optimizer=optimizer,
         device=device,
-        criterion=nn.CrossEntropyLoss,  # Use CrossEntropyLoss for classification
-        module__dropout=dropout,  # Set dropout rate as a hyperparameter
-        callbacks=[
-            ('train_acc', EpochScoring(scoring='accuracy', lower_is_better=False)),
-            ('valid_acc', EpochScoring(scoring='accuracy', lower_is_better=False)),
-            ('train_loss', EpochScoring(scoring='neg_log_loss', lower_is_better=False)),
-            ('valid_loss', EpochScoring(scoring='neg_log_loss', lower_is_better=False)),
-        ],
     )
+
     
     return model
 
@@ -90,12 +69,11 @@ def load_mnist_data(batch_size, test_split):
     X = mnist.data.astype('float32')
     y = mnist.target.astype('int64')
     X /= 255.0  # Normalize the pixel values to [0, 1]
+    X = X.reshape(-1, 1, 28, 28)
 
     # Split the dataset into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_split, random_state=42)
     
-    X_train = X_train.reshape(-1, 1, 28, 28)
-
     st.text("3. Randomly split training and test datasets.")
 
     # Display a 3x3 matrix of example images
@@ -154,23 +132,15 @@ def training_and_evaluation_app():
         
         # Training results
         st.subheader("Training Results")
+        
+        st.write(X_train.shape)
+        st.write(model.fit(X_train, y_train))  # Train for one epoch
 
-        for epoch in range(epochs):
-            st.write(f"Epoch {epoch + 1}/{epochs}")
-            
-            model.fit(X_train, y_train, epochs=1)  # Train for one epoch
-
-            st.subheader("Training Metrics")
-            st.write("Training Accuracy:", model.history[-1, 'train_acc'])
-            st.write("Validation Accuracy:", model.history[-1, 'valid_acc'])
-            st.write("Training Loss:", -model.history[-1, 'train_loss'])
-            st.write("Validation Loss:", -model.history[-1, 'valid_loss'])
-
-            # Evaluate the model on test data
-            y_pred = model.predict(X_test)
-            accuracy = accuracy_score(y_test, y_pred)
-            st.subheader("Model Evaluation")
-            st.write("Test Accuracy:", accuracy)
+        # Evaluate the model on test data
+        y_pred = model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        st.subheader("Model Evaluation")
+        st.write("Test Accuracy:", accuracy)
             
         if st.button("Save Model"):
             # Generate a timestamp
@@ -180,26 +150,26 @@ def training_and_evaluation_app():
             model_save_path = f"complete_model_{current_time}.pth"
             torch.save(model, model_save_path)
 
-            
-        if st.button("Evaluation Metrics"):
-            st.subheader("Model Evaluation")
-            st.write("Evaluating the model...")
-            
-            # Evaluate the model on test data
-            y_pred = model.predict(X_test)
-            accuracy = accuracy_score(y_test, y_pred)
-            st.subheader("Model Evaluation")
-            st.write("Test Accuracy:", accuracy)
+    # Evaluate model   
+    if st.button("Evaluation Metrics"):
+        st.subheader("Model Evaluation")
+        st.write("Evaluating the model...")
+        
+        # Evaluate the model on test data
+        y_pred = model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        st.subheader("Model Evaluation")
+        st.write("Test Accuracy:", accuracy)
 
-            conf_matrix = confusion_matrix(y_true, y_pred)
-            st.subheader("Confusion Matrix")
-            st.write(conf_matrix)
+        conf_matrix = confusion_matrix(y_true, y_pred)
+        st.subheader("Confusion Matrix")
+        st.write(conf_matrix)
 
-            class_report = classification_report(y_true, y_pred)
-            st.subheader("Classification Report")
-            st.text(class_report)
+        class_report = classification_report(y_true, y_pred)
+        st.subheader("Classification Report")
+        st.text(class_report)
 
-            plt.figure(figsize=(8, 6))
-            plt.imshow(conf_matrix, cmap="Blues", interpolation="nearest")
-            st.subheader("Confusion Matrix Heatmap")
-            st.pyplot(plt)
+        plt.figure(figsize=(8, 6))
+        plt.imshow(conf_matrix, cmap="Blues", interpolation="nearest")
+        st.subheader("Confusion Matrix Heatmap")
+        st.pyplot(plt)
