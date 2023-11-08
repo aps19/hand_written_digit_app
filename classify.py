@@ -1,12 +1,15 @@
 # Import necessary libraries
 import streamlit as st
 import torch
+import torch.nn as nn
+from skorch import NeuralNetClassifier
+import torch.nn.functional as F
 from PIL import Image
 import numpy as np
 from torchvision import transforms
 import pickle
 
-def create_cnn_model(learning_rate=0.01, dropout=0.5, device='cpu', hidden_units=100, optimizer='Adam',epochs=10):
+def create_cnn_model(learning_rate=0.01, dropout=0.5, device='cpu', hidden_units=100, optimizer=torch.optim.Adam,epochs=10):
     class Cnn(nn.Module):
         def __init__(self, dropout=0.5):
             super(Cnn, self).__init__()
@@ -91,9 +94,9 @@ def image_classification_app():
 
         # Load the saved parameters, optimizer state, and history
         model.load_params(
-            f_params='model_params.pkl',
-            f_optimizer='optimizer_state.pkl',
-            f_history='training_history.json'
+            f_params='digit_model_params.pkl',
+            f_optimizer='digit_optimizer_state.pkl',
+            f_history='digit_training_history.json'
         )
 
         st.write("Model loaded successfully!")

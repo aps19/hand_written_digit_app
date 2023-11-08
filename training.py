@@ -125,8 +125,6 @@ def training_and_evaluation_app():
     # Train the model
     if st.button("Train Model"):
         st.write(f"Training the model with learning rate: {learning_rate}, dropout: {dropout}, hidden units: {hidden_units}, batch size: {batch_size}...")
-
-        global model
         device = "cuda" if torch.cuda.is_available() else "cpu"
         model = create_cnn_model(learning_rate, dropout, device, hidden_units, optimizer,epochs)
         
@@ -134,7 +132,14 @@ def training_and_evaluation_app():
         st.subheader("Training Results")
         
         st.write(model.fit(X_train, y_train))  # Train for one epoch
-
+            
+        if st.button("Save Model"):    
+            model.save_params(
+                f_params='digit_model_params.pkl',
+                f_optimizer='digit_optimizer_state.pkl',
+                f_history='digit_training_history.json'
+            )
+        
         # Evaluate the model on test data
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
@@ -150,11 +155,11 @@ def training_and_evaluation_app():
         st.subheader("Model Evaluation")
         st.write("Test Accuracy:", accuracy)
 
-        conf_matrix = confusion_matrix(y_true, y_pred)
+        conf_matrix = confusion_matrix(y_test, y_pred)
         st.subheader("Confusion Matrix")
         st.write(conf_matrix)
 
-        class_report = classification_report(y_true, y_pred)
+        class_report = classification_report(y_test, y_pred)
         st.subheader("Classification Report")
         st.text(class_report)
 
@@ -163,10 +168,4 @@ def training_and_evaluation_app():
         st.subheader("Confusion Matrix Heatmap")
         st.pyplot(plt)
             
-        if st.button("Save Model"):
-            
-            model.save_params(
-                f_params='digit_model_params.pkl',
-                f_optimizer='digit_optimizer_state.pkl',
-                f_history='digit_training_history.json'
-            )
+        
