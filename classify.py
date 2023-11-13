@@ -7,6 +7,8 @@ import numpy as np
 from utility import create_cnn_model
 
 
+st.set_page_config(layout="wide")
+
 # Function to load the trained model
 def load_trained_model(model_path):
     # Load the model from the specified path
