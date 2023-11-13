@@ -1,19 +1,10 @@
 import streamlit as st
 from skorch import NeuralNetClassifier
-import random
 import torch
-import os
-import datetime
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-from skorch.callbacks import EpochScoring
-from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
-import torchvision.transforms as transforms
-from sklearn.datasets import fetch_openml
-import pickle
-from torchvision import datasets
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder
