@@ -7,8 +7,6 @@ from skimage.feature import greycomatrix, greycoprops, canny
 from skimage.color import rgb2gray
 
 import random
-st.set_page_config(layout="wide")
-
 
 def load_data():
     # Load MNIST dataset
