@@ -1,21 +1,16 @@
 import streamlit as st
-import torch
 import numpy as np
-from PIL import Image, ImageEnhance, ImageFilter, ImageOps
+from PIL import Image, ImageEnhance, ImageFilter
 from torchvision import transforms
-from skimage import exposure, color
+from skimage import exposure
 from skimage.feature import greycomatrix
-from skimage.measure import shannon_entropy
 from skimage.feature import greycoprops
 
 from skimage.color import rgb2gray
 
-from scipy.ndimage import gaussian_filter
-from scipy.ndimage import map_coordinates
 import random
-import matplotlib.pyplot as plt
 import cv2
-import io
+
 
 def load_data():
     # Load MNIST dataset
