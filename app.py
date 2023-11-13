@@ -6,6 +6,8 @@ from explore_dataset import explore_dataset
 
 from preprocessing import image_preprocessing_app
 
+st.set_page_config(layout="wide")
+
 def main():
     st.sidebar.title("Table of Contents")
     page_options = ["About", "Explore Dataset", "Preprocessing Techniques","Training and Evaluation", "Image Classification"]
