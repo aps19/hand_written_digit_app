@@ -1,9 +1,10 @@
 import streamlit as st
+st.set_page_config(layout="wide")
+
 from front_page import about
 from training import training_and_evaluation_app
 from classify import image_classification_app
 from explore_dataset import explore_dataset
-
 from preprocessing import image_preprocessing_app
 
 def main():
