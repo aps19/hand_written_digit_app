@@ -12,7 +12,7 @@ import seaborn as sns
 # Define model as a global variable to make it accessible for all pages
 model = None
 
-
+st.set_page_config(layout="wide")
 def create_cnn_model(learning_rate, dropout, device, hidden_units, optimizer, epochs):
     class Cnn(nn.Module):
         def __init__(self, dropout=0.5):
