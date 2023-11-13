@@ -7,7 +7,6 @@ from PIL import Image
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.datasets import fetch_openml
-import cv2
 
 st.set_page_config(layout="wide")
 
