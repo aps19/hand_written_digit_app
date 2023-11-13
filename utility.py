@@ -2,7 +2,9 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from skorch import NeuralNetClassifier
+
 
 def load_data():
     # Load MNIST dataset
