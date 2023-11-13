@@ -10,4 +10,3 @@ svgwrite
 seaborn
 captum
 scikit-image==0.18.3
-opencv-python-headless
