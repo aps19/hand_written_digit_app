@@ -8,8 +8,6 @@ from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.datasets import fetch_openml
 
-st.set_page_config(layout="wide")
-
 # Function to download and save the dataset to a local repository
 # Function to download and save the dataset to a local repository
 def download_and_save_dataset():
