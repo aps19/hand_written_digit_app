@@ -3,13 +3,11 @@ import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter
 from torchvision import transforms
 from skimage import exposure
-from skimage.feature import greycomatrix
-from skimage.feature import greycoprops
-
+from skimage.feature import greycomatrix, greycoprops, canny
 from skimage.color import rgb2gray
 
 import random
-import cv2
+
 
 
 def load_data():
@@ -111,8 +109,9 @@ def extract_glcm_features(image):
 # Function to apply edge detection to the image
 def apply_edge_detection(image):
     img_array = np.array(image)
-    edges = cv2.Canny(img_array, 100, 200)
-    return Image.fromarray(edges)
+    gray_image = rgb2gray(img_array)
+    edges = canny(gray_image, sigma=1)
+    return Image.fromarray(edges.astype(np.uint8) * 255)
 
 # Function to shift histogram of the image
 def shift_histogram(image, shift_factor):
